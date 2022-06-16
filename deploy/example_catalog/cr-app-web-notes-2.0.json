@@ -1,0 +1,58 @@
+{
+    "apiVersion": "kubedirector.hpe.com/v1beta1",
+    "kind": "KubeDirectorApp",
+    "metadata": {
+        "name" : "web-notes-app-2"
+    },
+
+    "spec" : {
+        "logoURL": "https://raw.githubusercontent.com/bluedatainc/solutions/master/MLOps/logos/ubuntu18x-logo.png",
+        "systemdRequired": true,
+        "defaultPersistDirs" : ["/home"],
+        "config": {
+            "roleServices": [
+                {
+                    "serviceIDs": [
+                        "ssh"
+                    ],
+                    "roleID": "server"
+                }
+            ],
+            "selectedRoles": [
+                "server"
+            ]
+        },
+        "label": {
+            "name": "Web notes",
+            "description": "Web notes application with web-interface and database"
+        },
+        "distroID": "bluedata/web-notes",
+        "version": "2.0",
+        "configSchemaVersion": 8,
+        "services": [
+            {
+                "endpoint": {
+                    "port": 22,
+                    "isDashboard": false
+                },
+                "id": "ssh",
+                "label": {
+                    "name": "SSH"
+                }
+            }
+        ],
+        "defaultImageRepoTag": "16.0.14.127:8888/bluedata/web-notes:2.0",
+        "defaultConfigPackage": null,
+        "upgradable": true,
+        "roles": [
+            {
+                "cardinality": "1+",
+                "id": "server",
+                "persistDirs": [
+                    "/usr/web-notes/database",
+                    "/usr/web-notes/v2.0-database"
+                  ]
+            }
+        ]
+    }
+}
