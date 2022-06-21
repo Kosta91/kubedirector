@@ -8,13 +8,11 @@
     "spec" : {
         "logoURL": "https://raw.githubusercontent.com/bluedatainc/solutions/master/MLOps/logos/ubuntu18x-logo.png",
         "systemdRequired": true,
-        "defaultPersistDirs" : ["/home"],
+        "defaultEventList" : ["configure", "addnodes", "delnodes"],
         "config": {
             "roleServices": [
                 {
-                    "serviceIDs": [
-                        "ssh"
-                    ],
+                    "serviceIDs": ["ssh", "http"],
                     "roleID": "server"
                 }
             ],
@@ -27,7 +25,7 @@
             "description": "Web notes application with web-interface and database"
         },
         "distroID": "bluedata/web-notes",
-        "version": "2.0",
+        "version": "2.0.0",
         "configSchemaVersion": 8,
         "services": [
             {
@@ -39,19 +37,29 @@
                 "label": {
                     "name": "SSH"
                 }
+            },
+            {
+                "endpoint": {
+                    "port": 10000,
+                    "isDashboard": true,
+                    "urlScheme": "http",
+                    "path": "/"
+                },
+                "id": "http",
+                "label": {
+                    "name": "http"
+                }
             }
         ],
         "defaultImageRepoTag": "16.0.14.127:8888/bluedata/web-notes:2.0",
-        "defaultConfigPackage": null,
+        "defaultConfigPackage": {
+            "packageURL": "file:///opt/configscripts/appconfig.tgz"
+        },
         "upgradable": true,
         "roles": [
             {
                 "cardinality": "1+",
-                "id": "server",
-                "persistDirs": [
-                    "/usr/web-notes/database",
-                    "/usr/web-notes/v2.0-database"
-                  ]
+                "id": "server"
             }
         ]
     }
