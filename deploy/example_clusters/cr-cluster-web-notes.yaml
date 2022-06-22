@@ -3,9 +3,9 @@ kind: "KubeDirectorCluster"
 metadata:
   name: "web-notes"
 spec:
-  app: web-notes-app
+  app: web-notes-app-2
   roles:
-  - id: server
+  - id: web-server
     members: 2
     resources:
       requests:
@@ -15,7 +15,4 @@ spec:
         memory: "4Gi"
         cpu: "2"
     storage:
-      size: "1Gi"
-    volumeProjections:
-      - pvcName: pvc-web-notes
-        mountPath: /data
+      size: "10Gi"

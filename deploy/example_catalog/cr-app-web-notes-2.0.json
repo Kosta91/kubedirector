@@ -7,17 +7,20 @@
 
     "spec" : {
         "logoURL": "https://raw.githubusercontent.com/bluedatainc/solutions/master/MLOps/logos/ubuntu18x-logo.png",
-        "systemdRequired": true,
+        "systemdRequired" : false,
+        "defaultPersistDirs" : ["/data"],
         "defaultEventList" : ["configure", "addnodes", "delnodes"],
+        "defaultImageRepoTag": "16.0.14.127:8888/bluedata/web-notes:2.0",
+        "upgradable" : true,
         "config": {
             "roleServices": [
                 {
                     "serviceIDs": ["ssh", "http"],
-                    "roleID": "server"
+                    "roleID": "web-server"
                 }
             ],
             "selectedRoles": [
-                "server"
+                "web-server"
             ]
         },
         "label": {
@@ -51,15 +54,13 @@
                 }
             }
         ],
-        "defaultImageRepoTag": "16.0.14.127:8888/bluedata/web-notes:2.0",
         "defaultConfigPackage": {
             "packageURL": "file:///opt/configscripts/appconfig.tgz"
         },
-        "upgradable": true,
         "roles": [
             {
                 "cardinality": "1+",
-                "id": "server"
+                "id": "web-server"
             }
         ]
     }
