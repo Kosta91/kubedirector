@@ -3,7 +3,7 @@ kind: "KubeDirectorCluster"
 metadata:
   name: "web-notes"
 spec:
-  app: web-notes-app-2
+  app: web-notes-app
   roles:
   - id: web-server
     members: 2
