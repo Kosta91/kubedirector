@@ -1,0 +1,67 @@
+{
+    "apiVersion": "kubedirector.hpe.com/v1beta1",
+    "kind": "KubeDirectorApp",
+    "metadata": {
+        "name" : "web-notes-app-2.1"
+    },
+
+    "spec" : {
+        "logoURL": "https://raw.githubusercontent.com/bluedatainc/solutions/master/MLOps/logos/ubuntu18x-logo.png",
+        "systemdRequired" : false,
+        "defaultPersistDirs" : ["/data"],
+        "defaultEventList" : ["configure", "addnodes", "delnodes"],
+        "defaultImageRepoTag": "16.0.14.127:8888/bluedata/web-notes:2.1",
+        "upgradable" : true,
+        "config": {
+            "roleServices": [
+                {
+                    "serviceIDs": ["ssh", "http"],
+                    "roleID": "web-server"
+                }
+            ],
+            "selectedRoles": [
+                "web-server"
+            ]
+        },
+        "label": {
+            "name": "Web notes",
+            "description": "Web notes application with web-interface and database"
+        },
+        "distroID": "bluedata/web-notes",
+        "version": "2.1.0",
+        "configSchemaVersion": 8,
+        "services": [
+            {
+                "endpoint": {
+                    "port": 22,
+                    "isDashboard": false
+                },
+                "id": "ssh",
+                "label": {
+                    "name": "SSH"
+                }
+            },
+            {
+                "endpoint": {
+                    "port": 10000,
+                    "isDashboard": true,
+                    "urlScheme": "http",
+                    "path": "/"
+                },
+                "id": "http",
+                "label": {
+                    "name": "http"
+                }
+            }
+        ],
+        "defaultConfigPackage": {
+            "packageURL": "file:///opt/configscripts/appconfig.tgz"
+        },
+        "roles": [
+            {
+                "cardinality": "1+",
+                "id": "web-server"
+            }
+        ]
+    }
+}
