@@ -8,10 +8,9 @@
     "spec" : {
         "logoURL": "https://raw.githubusercontent.com/bluedatainc/solutions/master/MLOps/logos/ubuntu18x-logo.png",
         "systemdRequired" : false,
-        "defaultPersistDirs" : ["/data"],
+        "defaultPersistDirs" : ["/data", "/home"],
         "defaultEventList" : ["configure", "addnodes", "delnodes"],
         "defaultImageRepoTag": "16.0.14.127:8888/bluedata/web-notes:1.0",
-        "upgradable" : true,
         "config": {
             "roleServices": [
                 {
