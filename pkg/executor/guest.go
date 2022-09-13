@@ -24,9 +24,7 @@ import (
 
 	"github.com/bluek8s/kubedirector/pkg/observer"
 	"github.com/bluek8s/kubedirector/pkg/shared"
-	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/remotecommand"
 	"k8s.io/client-go/util/exec"
@@ -37,12 +35,7 @@ import (
 // was found. If false, the returned error will be nil if the file is known to
 // be missing, or non-nil if the probe failed to execute.
 func IsFileExists(
-	reqLogger logr.Logger,
-	obj runtime.Object,
-	namespace string,
-	podName string,
-	expectedContainerID string,
-	containerName string,
+	args *ArgumentSet,
 	filePath string,
 	isDirectory bool,
 ) (bool, error) {
@@ -57,12 +50,7 @@ func IsFileExists(
 	var stdOut bytes.Buffer
 	ioStreams := &Streams{Out: &stdOut}
 	execErr := ExecCommand(
-		reqLogger,
-		obj,
-		namespace,
-		podName,
-		expectedContainerID,
-		containerName,
+		args,
 		command,
 		ioStreams,
 	)
@@ -88,12 +76,7 @@ func IsFileExists(
 // the filesystem of the given pod. If the setPerms option is true, the
 // directory will have its permissions set to 700.
 func CreateDir(
-	reqLogger logr.Logger,
-	obj runtime.Object,
-	namespace string,
-	podName string,
-	expectedContainerID string,
-	containerName string,
+	args *ArgumentSet,
 	dirName string,
 	setPerms bool,
 ) error {
@@ -104,12 +87,7 @@ func CreateDir(
 	var stdErr bytes.Buffer
 	ioStreams := &Streams{ErrOut: &stdErr}
 	err := ExecCommand(
-		reqLogger,
-		obj,
-		namespace,
-		podName,
-		expectedContainerID,
-		containerName,
+		args,
 		command,
 		ioStreams,
 	)
@@ -125,12 +103,7 @@ func CreateDir(
 	}
 	command = []string{"chmod", "700", dirName}
 	err = ExecCommand(
-		reqLogger,
-		obj,
-		namespace,
-		podName,
-		expectedContainerID,
-		containerName,
+		args,
 		command,
 		ioStreams,
 	)
@@ -145,12 +118,7 @@ func CreateDir(
 
 // RemoveDir removes a directory.
 func RemoveDir(
-	reqLogger logr.Logger,
-	obj runtime.Object,
-	namespace string,
-	podName string,
-	expectedContainerID string,
-	containerName string,
+	args *ArgumentSet,
 	dirName string,
 	ignoreNotEmpty bool,
 ) error {
@@ -167,12 +135,7 @@ func RemoveDir(
 	var stdErr bytes.Buffer
 	ioStreams := &Streams{ErrOut: &stdErr}
 	err := ExecCommand(
-		reqLogger,
-		obj,
-		namespace,
-		podName,
-		expectedContainerID,
-		containerName,
+		args,
 		command,
 		ioStreams,
 	)
@@ -192,24 +155,14 @@ func RemoveDir(
 // will be created as needed. If the setDirPerms option is true, the directory
 // containing the file will have its permissions set to 700.
 func CreateFile(
-	reqLogger logr.Logger,
-	obj runtime.Object,
-	namespace string,
-	podName string,
-	expectedContainerID string,
-	containerName string,
+	args *ArgumentSet,
 	filePath string,
 	reader io.Reader,
 	setDirPerms bool,
 ) error {
 
 	createDirErr := CreateDir(
-		reqLogger,
-		obj,
-		namespace,
-		podName,
-		expectedContainerID,
-		containerName,
+		args,
 		filepath.Dir(filePath),
 		setDirPerms,
 	)
@@ -222,20 +175,15 @@ func CreateFile(
 		In: reader,
 	}
 	shared.LogInfof(
-		reqLogger,
-		obj,
+		args.Logger,
+		args.Cluster,
 		shared.EventReasonNoEvent,
 		"creating file{%s} in pod{%s}",
 		filePath,
-		podName,
+		args.PodName,
 	)
 	return ExecCommand(
-		reqLogger,
-		obj,
-		namespace,
-		podName,
-		expectedContainerID,
-		containerName,
+		args,
 		command,
 		ioStreams,
 	)
@@ -243,15 +191,10 @@ func CreateFile(
 
 // ReadFile takes the stream from the given writer, and writes to it the
 // contents of the indicated filepath in the filesystem of the given pod.
-// The returned boolean and error are interpreted in the same way as for
+// The returned boolean and error are interpreted in the same way as fo
 // IsFileExists.
 func ReadFile(
-	reqLogger logr.Logger,
-	obj runtime.Object,
-	namespace string,
-	podName string,
-	expectedContainerID string,
-	containerName string,
+	args *ArgumentSet,
 	filePath string,
 	writer io.Writer,
 ) (bool, error) {
@@ -261,20 +204,15 @@ func ReadFile(
 		Out: writer,
 	}
 	shared.LogInfof(
-		reqLogger,
-		obj,
+		args.Logger,
+		args.Cluster,
 		shared.EventReasonNoEvent,
 		"reading file{%s} in pod{%s}",
 		filePath,
-		podName,
+		args.PodName,
 	)
 	execErr := ExecCommand(
-		reqLogger,
-		obj,
-		namespace,
-		podName,
-		expectedContainerID,
-		containerName,
+		args,
 		command,
 		ioStreams,
 	)
@@ -293,12 +231,7 @@ func ReadFile(
 // RunScript takes the stream from the given reader, and executes it as a
 // shell script in the given pod.
 func RunScript(
-	reqLogger logr.Logger,
-	obj runtime.Object,
-	namespace string,
-	podName string,
-	expectedContainerID string,
-	containerName string,
+	args *ArgumentSet,
 	description string,
 	reader io.Reader,
 ) error {
@@ -308,20 +241,15 @@ func RunScript(
 		In: reader,
 	}
 	shared.LogInfof(
-		reqLogger,
-		obj,
+		args.Logger,
+		args.Cluster,
 		shared.EventReasonNoEvent,
 		"running %s in pod{%s}",
 		description,
-		podName,
+		args.PodName,
 	)
 	return ExecCommand(
-		reqLogger,
-		obj,
-		namespace,
-		podName,
-		expectedContainerID,
-		containerName,
+		args,
 		command,
 		ioStreams,
 	)
@@ -331,37 +259,32 @@ func RunScript(
 // uses the given ioStreams to provide the command inputs and accept the
 // command outputs.
 func ExecCommand(
-	reqLogger logr.Logger,
-	obj runtime.Object,
-	namespace string,
-	podName string,
-	expectedContainerID string,
-	containerName string,
+	args *ArgumentSet,
 	command []string,
 	ioStreams *Streams,
 ) error {
 
-	pod, podErr := observer.GetPod(namespace, podName)
+	pod, podErr := observer.GetPod(args.NameSpace, args.PodName)
 	if podErr != nil {
 		shared.LogErrorf(
-			reqLogger,
+			args.Logger,
 			podErr,
-			obj,
+			args.Cluster,
 			shared.EventReasonNoEvent,
 			"could not find pod{%s}",
-			podName,
+			args.PodName,
 		)
 		return fmt.Errorf(
 			"pod{%v} does not exist",
-			podName,
+			args.PodName,
 		)
 	}
 
 	foundContainer := false
 	for _, containerStatus := range pod.Status.ContainerStatuses {
-		if containerStatus.Name == containerName {
+		if containerStatus.Name == args.ContainerName {
 			foundContainer = true
-			if containerStatus.ContainerID != expectedContainerID {
+			if containerStatus.ContainerID != args.ContainerID {
 				return errors.New("container ID changed during configuration")
 			}
 			break
@@ -370,27 +293,27 @@ func ExecCommand(
 	if !foundContainer {
 		return fmt.Errorf(
 			"container{%s} does not exist in pod{%v}",
-			containerName,
-			podName,
+			args.ContainerName,
+			args.PodName,
 		)
 	}
 
 	if pod.Status.Phase == corev1.PodSucceeded || pod.Status.Phase == corev1.PodFailed {
 		return fmt.Errorf(
 			"cannot connect to pod{%v} in phase %v",
-			podName,
+			args.PodName,
 			pod.Status.Phase,
 		)
 	}
 
 	request := shared.ClientSet().CoreV1().RESTClient().Post().
 		Resource("pods").
-		Name(podName).
-		Namespace(namespace).
+		Name(args.PodName).
+		Namespace(args.NameSpace).
 		SubResource("exec").
-		Param("container", containerName)
+		Param("container", args.ContainerName)
 	request.VersionedParams(&corev1.PodExecOptions{
-		Container: containerName,
+		Container: args.ContainerName,
 		Command:   command,
 		Stdin:     ioStreams.In != nil,
 		Stdout:    ioStreams.Out != nil,
@@ -404,9 +327,9 @@ func ExecCommand(
 	)
 	if initErr != nil {
 		shared.LogError(
-			reqLogger,
+			args.Logger,
 			initErr,
-			obj,
+			args.Cluster,
 			shared.EventReasonNoEvent,
 			"failed to init the executor",
 		)

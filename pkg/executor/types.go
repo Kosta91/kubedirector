@@ -17,7 +17,9 @@ package executor
 import (
 	"io"
 
+	kdv1 "github.com/bluek8s/kubedirector/pkg/apis/kubedirector/v1beta1"
 	"github.com/bluek8s/kubedirector/pkg/shared"
+	"github.com/go-logr/logr"
 )
 
 const (
@@ -83,4 +85,13 @@ type Streams struct {
 	In     io.Reader
 	Out    io.Writer
 	ErrOut io.Writer
+}
+
+type ArgumentSet struct {
+	Logger        logr.Logger
+	Cluster       *kdv1.KubeDirectorCluster
+	NameSpace     string
+	PodName       string
+	ContainerID   string
+	ContainerName string
 }
